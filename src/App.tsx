@@ -47,8 +47,6 @@ export default function App() {
   const [planData, setPlanData] = useState<MonthlyPlan[]>(defaultPlan);
   const [showReport, setShowReport] = useState(false);
   const [isYearlyView, setIsYearlyView] = useState(true);
-  
-  const [activeTab, setActiveTab] = useState<'taxes' | 'calendar' | 'fleet'>('taxes');
 
   const [settings, setSettings] = useState<GlobalSettings>({
     maxHours: 250,
@@ -195,7 +193,7 @@ export default function App() {
         </header>
 
         {/* Global Key Metrics Dashboard */}
-        <section className="bg-slate-900 text-white rounded-3xl shadow-2xl relative z-10">
+        <section className="bg-slate-900 text-white rounded-3xl shadow-2xl relative z-10 mb-8">
           {/* Add an inner wrapper for the blur to prevent overflow on the design without clipping tooltips, though better to just clip the blur element's container */}
           <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/20 rounded-full mix-blend-screen filter blur-3xl translate-x-1/2 -translate-y-1/2 print:hidden"/>
@@ -349,25 +347,11 @@ export default function App() {
           </div>
         </section>
         
-        <DashboardCharts chartData={chartData} />
+        <CollapsibleSection title="Дашборды (Графики)" defaultOpen={false}>
+          <DashboardCharts chartData={chartData} />
+        </CollapsibleSection>
 
-        {/* TABS NAVIGATION */}
-        <div className="flex border-b border-slate-300 gap-4 mb-4 overflow-x-auto print:hidden">
-          <button 
-            onClick={() => setActiveTab('taxes')} 
-            className={cn("pb-3 text-sm font-bold uppercase tracking-wider transition-colors", activeTab === 'taxes' ? "border-b-2 border-blue-600 text-blue-800" : "text-slate-500 hover:text-slate-800")}
-          >Стратегия и Налоги</button>
-          <button 
-            onClick={() => setActiveTab('fleet')} 
-            className={cn("pb-3 text-sm font-bold uppercase tracking-wider transition-colors", activeTab === 'fleet' ? "border-b-2 border-blue-600 text-blue-800" : "text-slate-500 hover:text-slate-800")}
-          >Автопарк</button>
-          <button 
-            onClick={() => setActiveTab('calendar')} 
-            className={cn("pb-3 text-sm font-bold uppercase tracking-wider transition-colors", activeTab === 'calendar' ? "border-b-2 border-blue-600 text-blue-800" : "text-slate-500 hover:text-slate-800")}
-          >Календарь</button>
-        </div>
-
-        {activeTab === 'taxes' && (
+        <CollapsibleSection title="Стратегия и Налоги" defaultOpen={false}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-4">
             <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <label className="text-sm font-semibold text-slate-700 mb-2 block">Система Налогообложения</label>
@@ -416,13 +400,9 @@ export default function App() {
                </div>
             </div>
           </div>
-        )}
+        </CollapsibleSection>
 
-        {activeTab === 'calendar' && (
-          <div className="mt-4"><CalendarPlanner planData={planData} updatePlan={updatePlan} /></div>
-        )}
-
-        {activeTab === 'fleet' && (
+        <CollapsibleSection title="Автопарк" defaultOpen={true}>
           <div className="mt-4">
             <FleetManager 
               fleet={fleet} 
@@ -432,7 +412,11 @@ export default function App() {
               settings={settings}
             />
           </div>
-        )}
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Календарь Загрузки" defaultOpen={false}>
+          <div className="mt-4"><CalendarPlanner planData={planData} updatePlan={updatePlan} /></div>
+        </CollapsibleSection>
 
       </div>
 
