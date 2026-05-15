@@ -54,7 +54,11 @@ ${JSON.stringify({
       res.json({ analysis: response.text });
     } catch (error: any) {
       console.error('Error generating tax analysis:', error);
-      res.status(500).json({ error: error.message || 'Ошибка генерации отчета' });
+      let errorMessage = error.message || 'Ошибка генерации отчета';
+      if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key not valid')) {
+         errorMessage = 'Ключ API недействителен. Пожалуйста, зайдите в настройки (Settings -> Secrets) и укажите рабочий GEMINI_API_KEY.';
+      }
+      res.status(500).json({ error: errorMessage });
     }
   });
 
@@ -103,7 +107,11 @@ ${JSON.stringify({
       res.json({ analysis: response.text });
     } catch (error: any) {
       console.error('Error generating market optimization:', error);
-      res.status(500).json({ error: error.message || 'Ошибка генерации отчета' });
+      let errorMessage = error.message || 'Ошибка генерации отчета';
+      if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key not valid')) {
+         errorMessage = 'Ключ API недействителен. Пожалуйста, зайдите в настройки (Settings -> Secrets) и укажите рабочий GEMINI_API_KEY.';
+      }
+      res.status(500).json({ error: errorMessage });
     }
   });
 
