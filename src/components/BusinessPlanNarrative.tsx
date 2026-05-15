@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatCurrency, cn } from '../utils';
 import { GlobalSettings } from '../types';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, Share2, Download } from 'lucide-react';
 
 interface BusinessPlanNarrativeProps {
   yearlyTotals: any;
@@ -9,23 +9,32 @@ interface BusinessPlanNarrativeProps {
   fleetCount: number;
   visible: boolean;
   onClose: () => void;
+  onShare: () => void;
+  onExport: () => void;
+  onAIAnalysis: () => void;
 }
 
-export function BusinessPlanNarrative({ yearlyTotals, settings, fleetCount, visible, onClose }: BusinessPlanNarrativeProps) {
+export function BusinessPlanNarrative({ yearlyTotals, settings, fleetCount, visible, onClose, onShare, onExport, onAIAnalysis }: BusinessPlanNarrativeProps) {
   const isUSN = settings.taxSystem === 'USN_5' || settings.taxSystem === 'USN_22';
   const taxSysName = settings.taxSystem === 'USN_5' ? 'УСН (Доходы минус Расходы 15%) + НДС 5%' : 
                      settings.taxSystem === 'OSNO' ? 'ОСНО (НДС 22% + Прибыль 23%)' :
                      'УСН (Д-Р 15%) с уплатой НДС 22%';
                      
   return (
-    <div className={cn("fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-8 print:p-0 print:bg-white print:block transition-all", visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none print:opacity-100")}>
-      <div className="bg-white max-w-4xl mx-auto rounded-3xl shadow-2xl p-8 sm:p-12 relative print:shadow-none print:p-0 print:border-none">
+    <div className={cn("fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-8 print:static print:inset-auto print:p-0 print:bg-white print:block transition-all", visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none print:opacity-100")}>
+      <div className="bg-white max-w-4xl mx-auto rounded-3xl shadow-2xl p-8 sm:p-12 relative print:shadow-none print:p-0 print:border-none print:max-w-none print:m-0">
         
         <div className="absolute top-6 right-6 flex items-center gap-3 print:hidden">
-          <button onClick={() => window.print()} className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors">
+          <button onClick={onExport} title="Экспорт CSV" className="p-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-full transition-colors">
+            <Download className="w-5 h-5" />
+          </button>
+          <button onClick={onShare} title="Поделиться расчетом" className="p-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-full transition-colors">
+            <Share2 className="w-5 h-5" />
+          </button>
+          <button onClick={() => window.print()} title="Печать/PDF" className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors">
             <Printer className="w-5 h-5" />
           </button>
-          <button onClick={onClose} className="p-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-full transition-colors">
+          <button onClick={onClose} title="Закрыть" className="p-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -42,6 +51,13 @@ export function BusinessPlanNarrative({ yearlyTotals, settings, fleetCount, visi
         Предприятие выступает поставщиком транспортных услуг как внешним заказчикам (генерация открытого дохода), так и внутренним структурам холдинга (обеспечение логистической безопасности). 
       </p>
 
+      {settings.notes && (
+        <div className="bg-slate-50 border-l-4 border-slate-400 p-4 mb-6 text-sm text-slate-700 italic">
+          <strong className="block font-bold text-slate-900 not-italic mb-1">Пояснения к проекту:</strong>
+          <span className="whitespace-pre-line">{settings.notes}</span>
+        </div>
+      )}
+
       <ul className="list-disc pl-8 mb-6 space-y-2">
         <li><strong>Размер парка:</strong> {fleetCount} ед. техники</li>
         <li><strong>Система Налогообложения:</strong> {taxSysName}</li>
@@ -49,6 +65,27 @@ export function BusinessPlanNarrative({ yearlyTotals, settings, fleetCount, visi
         <li><strong>ФОТ:</strong> {settings.isOfficialWorker ? 'Белый штат, учитываются все социальные отчисления и НДФЛ' : 'Непрозрачный штат (риски)'}</li>
         <li><strong>Накладные расходы (База+Офис):</strong> {formatCurrency(settings.fixedOverhead)} в месяц</li>
       </ul>
+
+      {settings.isOfficialWorker && (
+         <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl mb-6 shadow-sm">
+            <h3 className="font-bold text-orange-900 mb-2">Детализация расчета "Белого" ФОТ за год</h3>
+            <p className="text-sm text-slate-700 mb-2">
+               Мы берем заданную "сумму на руки" (НЕТТО) {formatCurrency(yearlyTotals.fotPure)}, и рассчитываем из нее БРУТТО (до вычета налогов), а также страховые взносы сверху. Формулы:
+            </p>
+            <ul className="text-sm space-y-1 text-slate-800 list-inside list-disc">
+               <li><span className="font-mono bg-white px-1 rounded border border-slate-200">БРУТТО = НЕТТО / 0.87</span> = <strong>{formatCurrency(yearlyTotals.fotPure / 0.87)}</strong></li>
+               <li><span className="font-mono bg-white px-1 rounded border border-slate-200">НДФЛ (13%) = БРУТТО - НЕТТО</span> = <strong>{formatCurrency(yearlyTotals.fotNdfl)}</strong></li>
+               <li><span className="font-mono bg-white px-1 rounded border border-slate-200">Взносы ({settings.isAzrfResident ? '7.6%' : '30.2%'}) = БРУТТО * {settings.isAzrfResident ? '0.076' : '0.302'}</span> = <strong>{formatCurrency(yearlyTotals.fotSocialTaxes)}</strong></li>
+               <li className="pt-2 italic text-slate-600">Для модели общая стоимость рабочего времени (ФОТ) включает: НЕТТО + НДФЛ + Взносы = <strong>{formatCurrency(yearlyTotals.fotPure + yearlyTotals.fotNdfl + yearlyTotals.fotSocialTaxes)}</strong></li>
+            </ul>
+         </div>
+      )}
+
+      <div className="flex justify-start print:hidden mb-6">
+        <button onClick={onAIAnalysis} className="flex items-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm">
+           🤖 Запустить AI Анализ Налоговых Рисков
+        </button>
+      </div>
 
       <h2 className="text-xl font-bold mt-8 mb-4 border-b border-gray-300 pb-2">2. Годовая Финансовая Проекция и Налоги ({taxSysName})</h2>
       <p className="mb-4">На основании заданных параметров загрузки, тарифов, сезонных спадов (модификаторов) и смещений в пользу внешней/внутренней аренды рассчитаны следующие годовые показатели:</p>

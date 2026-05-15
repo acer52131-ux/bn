@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Truck, Printer, Download, CheckCircle2, Factory, FileText, X } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Truck, Printer, Download, CheckCircle2, Factory, FileText, X, Share2, Copy, TrendingUp } from 'lucide-react';
 import { Vehicle, GlobalSettings, MonthlyPlan, TaxSystem } from './types';
 import { defaultFleet } from './data';
 import { cn, formatCurrency, exportToCSV } from './utils';
@@ -8,6 +8,8 @@ import { FleetManager } from './components/FleetManager';
 import { CalendarPlanner } from './components/CalendarPlanner';
 import { DashboardCharts } from './components/DashboardCharts';
 import { BusinessPlanNarrative } from './components/BusinessPlanNarrative';
+import { AIAnalysisModal } from './components/AIAnalysisModal';
+import { AIMarketOptimizationModal } from './components/AIMarketOptimizationModal';
 
 const MONTHS = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 
@@ -46,6 +48,8 @@ export default function App() {
   const [fleet, setFleet] = useState<Vehicle[]>(defaultFleet);
   const [planData, setPlanData] = useState<MonthlyPlan[]>(defaultPlan);
   const [showReport, setShowReport] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [showMarketModal, setShowMarketModal] = useState(false);
   const [isYearlyView, setIsYearlyView] = useState(true);
 
   const [settings, setSettings] = useState<GlobalSettings>({
@@ -56,6 +60,26 @@ export default function App() {
     fixedOverhead: 439300,
     totalRepairBudget: 500000
   });
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    try {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const decoded = JSON.parse(decodeURIComponent(atob(hash)));
+        if (decoded.fleet) setFleet(decoded.fleet);
+        if (decoded.planData) setPlanData(decoded.planData);
+        if (decoded.settings) setSettings(decoded.settings);
+      }
+    } catch (e) {
+      console.error("Failed to parse state from URL", e);
+    }
+    // Small delay to show off the loading animation cleanly
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
 
   const updateVehicle = (id: number, field: keyof Vehicle, value: any) => {
     setFleet(prev => prev.map(v => v.id === id ? { ...v, [field]: value } : v));
@@ -99,7 +123,10 @@ export default function App() {
       rentNet: 0, 
       totalInputVat: 0, 
       rentVatInput: 0, 
-      outputVat: 0 
+      outputVat: 0,
+      fotPure: 0,
+      fotNdfl: 0,
+      fotSocialTaxes: 0
     };
 
     // Aggregate Yearly Totals
@@ -116,7 +143,10 @@ export default function App() {
       rentNet: acc.rentNet + curr.totals.rentNet,
       totalInputVat: acc.totalInputVat + curr.totals.totalInputVat,
       rentVatInput: acc.rentVatInput + curr.totals.rentVatInput,
-      outputVat: acc.outputVat + curr.totals.outputVat
+      outputVat: acc.outputVat + curr.totals.outputVat,
+      fotPure: acc.fotPure + curr.totals.fotPure,
+      fotNdfl: acc.fotNdfl + curr.totals.fotNdfl,
+      fotSocialTaxes: acc.fotSocialTaxes + curr.totals.fotSocialTaxes
     }), ObjectTotalsInit);
 
     // Average per month calculation (for the Fleet Manager display which reflects an "Average Month")
@@ -165,7 +195,30 @@ export default function App() {
     exportToCSV('transport_plan.csv', flatData);
   }
 
+  const handleShare = async () => {
+    try {
+      const state = { fleet, planData, settings };
+      const base64 = btoa(encodeURIComponent(JSON.stringify(state)));
+      const url = new URL(window.location.href);
+      url.hash = base64;
+      await navigator.clipboard.writeText(url.toString());
+      alert("Ссылка на расчет скопирована в буфер обмена!");
+    } catch (e) {
+      console.error(e);
+      alert("Не удалось скопировать ссылку.");
+    }
+  };
+
   const { yearlyTotals, chartData, calculatedBaseData } = yearlyCalculation;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center flex-col text-white">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-lg font-medium animate-pulse">Загрузка параметров модели...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 relative print:bg-white overflow-hidden pb-20 font-sans">
@@ -182,12 +235,18 @@ export default function App() {
             </h1>
             <p className="text-slate-500 mt-2 font-medium">Финансовая модель предприятия с учетом сезонности и НДС</p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3 print:hidden">
-             <button onClick={() => setShowReport(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold transition-all hover:shadow-[0_8px_20px_rgb(59,130,246,0.3)] hover:-translate-y-0.5 shadow-md border border-indigo-500/50 whitespace-nowrap">
-               <FileText className="w-5 h-5" /> Сформировать Отчет
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 print:hidden w-full sm:w-auto">
+             <button onClick={() => setShowMarketModal(true)} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-2xl font-semibold transition-all hover:shadow-[0_8px_20px_rgb(16,185,129,0.3)] hover:-translate-y-0.5 shadow-md border border-emerald-400/50 whitespace-nowrap" title="AI Маркетолог: Оптимизация цен и прибыли">
+               <TrendingUp className="w-5 h-5" /> AI Маркетолог
              </button>
-             <button onClick={handleExportCSV} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 px-6 py-3 rounded-2xl font-semibold transition-all hover:shadow-sm hover:-translate-y-0.5 shadow-sm whitespace-nowrap">
+             <button onClick={() => setShowReport(true)} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold transition-all hover:shadow-[0_8px_20px_rgb(59,130,246,0.3)] hover:-translate-y-0.5 shadow-md border border-indigo-500/50 whitespace-nowrap">
+               <FileText className="w-5 h-5" /> Отчет
+             </button>
+             <button onClick={handleExportCSV} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 px-6 py-3 rounded-2xl font-semibold transition-all hover:shadow-sm hover:-translate-y-0.5 shadow-sm whitespace-nowrap">
                 <Download className="w-5 h-5" /> CSV
+             </button>
+             <button onClick={handleShare} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 px-6 py-3 rounded-2xl font-semibold transition-all hover:shadow-sm hover:-translate-y-0.5 shadow-sm whitespace-nowrap" title="Поделиться ссылкой с текущими расчетами">
+                <Share2 className="w-5 h-5" /> Поделиться
              </button>
           </div>
         </header>
@@ -306,7 +365,7 @@ export default function App() {
                 <p className="text-4xl font-black text-indigo-100">{formatCurrency(isYearlyView ? yearlyTotals.netProfit : yearlyTotals.netProfit / 12)}</p>
              </div>
 
-             <div className="border-t sm:border-t-0 sm:border-l border-white/10 pt-6 sm:pt-0 sm:pl-8 bg-emerald-900/40 -m-4 p-4 rounded-xl border border-emerald-800/50 group/holding relative">
+             <div className="bg-emerald-900/40 p-5 sm:p-6 rounded-2xl border border-emerald-500/30 group/holding relative shadow-[0_0_30px_rgba(52,211,153,0.1)]">
                 <p className="text-emerald-400 font-bold text-xs uppercase tracking-widest mb-2 flex items-center gap-2 border-b border-dashed border-emerald-800 w-fit">
                   <CheckCircle2 className="w-4 h-4"/> Профит Холдинга
                 </p>
@@ -371,11 +430,11 @@ export default function App() {
             </div>
             <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
                <label className="text-sm font-semibold text-slate-700 mb-2 block">Аренда База+Офис (в мес)</label>
-              <input type="number" step="10000" value={settings.fixedOverhead} onChange={e => setSettings({...settings, fixedOverhead: Number(e.target.value)})} className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input type="number" min="0" step="10000" value={settings.fixedOverhead} onChange={e => setSettings({...settings, fixedOverhead: Number(e.target.value)})} className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
                <label className="text-sm font-semibold text-slate-700 mb-2 block text-blue-800">Бюджет Ремонта (в мес)</label>
-              <input type="number" step="10000" value={settings.totalRepairBudget} onChange={e => setSettings({...settings, totalRepairBudget: Number(e.target.value)})} className="w-full bg-slate-50 border border-blue-200 text-slate-900 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+              <input type="number" min="0" step="10000" value={settings.totalRepairBudget} onChange={e => setSettings({...settings, totalRepairBudget: Number(e.target.value)})} className="w-full bg-slate-50 border border-blue-200 text-slate-900 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
             </div>
             <div className="p-4 rounded-2xl border border-orange-200 bg-orange-50 flex flex-col justify-center cursor-pointer shadow-sm hover:shadow-md transition-shadow" onClick={() => setSettings({...settings, isOfficialWorker: !settings.isOfficialWorker})}>
                <div className="flex items-center justify-between">
@@ -399,6 +458,15 @@ export default function App() {
                  </div>
                </div>
             </div>
+          </div>
+          <div className="mt-6 flex flex-col">
+            <label className="text-sm font-semibold text-slate-700 mb-2 block">Комментарии / Пояснения к проекту</label>
+            <textarea 
+               className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium resize-y min-h-[100px]" 
+               placeholder="Введите здесь описание проекта, специфику расчетов или основные допущения..."
+               value={settings.notes || ''}
+               onChange={e => setSettings({...settings, notes: e.target.value})}
+            />
           </div>
         </CollapsibleSection>
 
@@ -426,6 +494,21 @@ export default function App() {
         fleetCount={fleet.length} 
         visible={showReport}
         onClose={() => setShowReport(false)}
+        onShare={handleShare}
+        onExport={handleExportCSV}
+        onAIAnalysis={() => setShowAIModal(true)}
+      />
+
+      <AIAnalysisModal 
+        visible={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        analysisData={{ fleet, planData, settings, yearlyTotals }}
+      />
+
+      <AIMarketOptimizationModal
+        visible={showMarketModal}
+        onClose={() => setShowMarketModal(false)}
+        analysisData={{ fleet, planData, settings, yearlyTotals }}
       />
     </div>
   );

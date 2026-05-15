@@ -36,6 +36,9 @@ export function calculateMonth(
     totalInputVat: 0,
     rentVatInput: 0,
     outputVat: 0,
+    fotPure: 0,
+    fotNdfl: 0,
+    fotSocialTaxes: 0,
   };
 
   const vehicles = fleet.map(v => {
@@ -147,6 +150,9 @@ export function calculateMonth(
     totals.totalInputVat += totalInputVat;
     totals.rentVatInput += rentVatInput;
     totals.outputVat += outputVat;
+    totals.fotPure += v.driverSal;
+    totals.fotNdfl += ndfl;
+    totals.fotSocialTaxes += socialTaxes;
 
     return {
       vehicleId: v.id,

@@ -29,16 +29,16 @@ export function FleetManager({ fleet, updateVehicle, updateGroup, calculatedData
       
       {/* LEFT SIDEBAR: Vehicles List */}
       <div className="w-full md:w-80 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex-shrink-0">
-        <div className="p-4 bg-slate-50 border-b border-slate-200">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 print:hidden">
           <h2 className="font-bold text-slate-800">Список техники</h2>
         </div>
         
-        <div className="overflow-y-auto max-h-[800px] p-2 space-y-4">
+        <div className="overflow-x-auto md:overflow-y-auto md:max-h-[800px] p-2 flex md:flex-col gap-2 md:gap-4 md:space-y-4 print:hidden">
           {groups.map(g => {
             const groupFleet = fleet.filter(v => v.type === g);
             if (groupFleet.length === 0) return null;
             return (
-              <div key={g}>
+              <div key={g} className="flex-shrink-0 min-w-[200px] md:min-w-0 md:w-full">
                 <h3 className="text-xs font-bold text-slate-400 uppercase mb-2 px-2 tracking-wider">{TYPE_NAMES[g]}</h3>
                 <div className="space-y-1">
                   {groupFleet.map(v => (
@@ -52,7 +52,7 @@ export function FleetManager({ fleet, updateVehicle, updateGroup, calculatedData
                           : "hover:bg-slate-100 text-slate-700 hover:text-slate-900"
                       )}
                     >
-                      <span className="font-semibold truncate">{v.name}</span>
+                      <span className="font-semibold truncate w-full block">{v.name}</span>
                       <span className={cn(
                         "text-[10px] mt-1 font-mono px-1.5 py-0.5 rounded-md inline-block w-fit",
                         activeVehicleId === v.id ? "bg-blue-600/50 text-white" : "bg-slate-200 text-slate-500"
@@ -95,20 +95,20 @@ export function FleetManager({ fleet, updateVehicle, updateGroup, calculatedData
                     <div className="space-y-4">
                       <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Тариф внешний (руб/ч)</label>
-                        <input type="number" value={activeVehicle.basePrice} onChange={e => updateVehicle(activeVehicle.id, 'basePrice', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
+                        <input type="number" min="0" value={activeVehicle.basePrice} onChange={e => updateVehicle(activeVehicle.id, 'basePrice', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-indigo-500 mb-1">Тариф Холдингу (руб/ч)</label>
-                        <input type="number" value={activeVehicle.internalPrice} onChange={e => updateVehicle(activeVehicle.id, 'internalPrice', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-indigo-50/30 border-indigo-200" />
+                        <input type="number" min="0" value={activeVehicle.internalPrice} onChange={e => updateVehicle(activeVehicle.id, 'internalPrice', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-indigo-50/30 border-indigo-200" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-slate-500 mb-1">Общая загрузка (%)</label>
-                          <input type="number" value={activeVehicle.loadPercent} onChange={e => updateVehicle(activeVehicle.id, 'loadPercent', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
+                          <input type="number" min="0" max="100" value={activeVehicle.loadPercent} onChange={e => updateVehicle(activeVehicle.id, 'loadPercent', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-indigo-500 mb-1">Из них свои заказы (%)</label>
-                          <input type="number" value={activeVehicle.internalPercent} onChange={e => updateVehicle(activeVehicle.id, 'internalPercent', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-indigo-50/30 border-indigo-200" />
+                          <input type="number" min="0" max="100" value={activeVehicle.internalPercent} onChange={e => updateVehicle(activeVehicle.id, 'internalPercent', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-indigo-50/30 border-indigo-200" />
                         </div>
                       </div>
                     </div>
@@ -121,18 +121,18 @@ export function FleetManager({ fleet, updateVehicle, updateGroup, calculatedData
                     <div className="space-y-4">
                       <div className="bg-orange-50 p-3 rounded-xl border border-orange-100">
                         <label className="block text-xs font-bold text-orange-800 mb-1">Оклад Водителя (в мес)</label>
-                        <input type="number" value={activeVehicle.driverSal} step="1000" onChange={e => updateVehicle(activeVehicle.id, 'driverSal', Number(e.target.value))} className="w-full px-3 py-2 border border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-500" />
+                        <input type="number" min="0" value={activeVehicle.driverSal} step="1000" onChange={e => updateVehicle(activeVehicle.id, 'driverSal', Number(e.target.value))} className="w-full px-3 py-2 border border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-500" />
                         <p className="text-[10px] text-orange-600 mt-1">*Если 0 руб - аренда без водителя (ГСМ=0)</p>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2">
                         <div className="col-span-2">
                           <label className="block text-xs font-bold text-slate-500 mb-1">Стоимость ТС</label>
-                          <input type="number" step="100000" value={activeVehicle.vehicleValue} onChange={e => updateVehicle(activeVehicle.id, 'vehicleValue', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg" />
+                          <input type="number" min="0" step="100000" value={activeVehicle.vehicleValue} onChange={e => updateVehicle(activeVehicle.id, 'vehicleValue', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg" />
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-slate-500 mb-1">Ремонт %</label>
-                          <input type="number" step="0.1" value={activeVehicle.repairPercent} onChange={e => updateVehicle(activeVehicle.id, 'repairPercent', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg" />
+                          <input type="number" min="0" max="100" step="0.1" value={activeVehicle.repairPercent} onChange={e => updateVehicle(activeVehicle.id, 'repairPercent', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg" />
                         </div>
                       </div>
 
@@ -147,7 +147,7 @@ export function FleetManager({ fleet, updateVehicle, updateGroup, calculatedData
                               <div className="flex gap-2">
                                 <div className="flex-1">
                                   <label className="block text-xs font-bold text-slate-500 mb-1">Срок амортизации (мес)</label>
-                                  <input type="number" step="1" value={activeVehicle.amortizationMonths} onChange={e => updateVehicle(activeVehicle.id, 'amortizationMonths', Number(e.target.value))} className="w-full px-3 py-1.5 border rounded-md bg-white focus:ring-2 focus:ring-slate-400 text-sm" />
+                                  <input type="number" min="1" step="1" value={activeVehicle.amortizationMonths} onChange={e => updateVehicle(activeVehicle.id, 'amortizationMonths', Number(e.target.value))} className="w-full px-3 py-1.5 border rounded-md bg-white focus:ring-2 focus:ring-slate-400 text-sm" />
                                 </div>
                                 <div className="flex-[2] flex flex-col justify-end">
                                   <div className="text-[11px] text-slate-600 font-medium whitespace-nowrap">Аренда/мес: <span className="font-bold text-slate-800">{new Intl.NumberFormat('ru-RU').format(Math.round(calculatedData[activeVehicle.id]?.rentGross || 0))} ₽</span></div>
@@ -161,7 +161,7 @@ export function FleetManager({ fleet, updateVehicle, updateGroup, calculatedData
                               <div className="flex gap-2">
                                 <div className="flex-1">
                                   <label className="block text-xs font-bold text-slate-500 mb-1">Аренда Фикс. (в мес)</label>
-                                  <input type="number" step="1000" value={activeVehicle.rentCost} onChange={e => updateVehicle(activeVehicle.id, 'rentCost', Number(e.target.value))} className="w-full px-3 py-1.5 border rounded-md bg-white focus:ring-2 focus:ring-slate-400 text-sm" />
+                                  <input type="number" min="0" step="1000" value={activeVehicle.rentCost} onChange={e => updateVehicle(activeVehicle.id, 'rentCost', Number(e.target.value))} className="w-full px-3 py-1.5 border rounded-md bg-white focus:ring-2 focus:ring-slate-400 text-sm" />
                                 </div>
                                 <div className="flex-[2] flex flex-col justify-end">
                                   <div className="text-[11px] text-slate-600 font-medium whitespace-nowrap">Аренда/час: <span className="font-bold text-indigo-700">{new Intl.NumberFormat('ru-RU').format(Math.round((calculatedData[activeVehicle.id]?.rentGross || 0) / (calculatedData[activeVehicle.id]?.workHours || 1)))} ₽</span></div>
@@ -173,7 +173,7 @@ export function FleetManager({ fleet, updateVehicle, updateGroup, calculatedData
                         </div>
                         <div className="col-span-2">
                           <label className="block text-xs font-bold text-slate-500 mb-1">ГСМ (руб/ч)</label>
-                          <input type="number" step="10" value={activeVehicle.fuelCost} onChange={e => updateVehicle(activeVehicle.id, 'fuelCost', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-slate-400" disabled={activeVehicle.driverSal === 0} />
+                          <input type="number" min="0" step="10" value={activeVehicle.fuelCost} onChange={e => updateVehicle(activeVehicle.id, 'fuelCost', Number(e.target.value))} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-slate-400" disabled={activeVehicle.driverSal === 0} />
                         </div>
                       </div>
                     </div>

@@ -9,17 +9,22 @@
   body {
     @apply antialiased text-slate-900;
   }
+  
+  input[type="number"]:out-of-range,
+  input:invalid {
+    @apply border-red-500 ring-1 ring-red-500 bg-red-50;
+  }
 }
 
 @media print {
   @page {
-    size: A4 landscape;
-    margin: 10mm;
+    size: A4 portrait;
+    margin: 15mm;
   }
   
   body {
     background: white !important;
-    font-size: 10px;
+    font-size: 11px;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

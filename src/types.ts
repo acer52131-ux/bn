@@ -30,6 +30,7 @@ export interface GlobalSettings {
   taxSystem: TaxSystem;
   fixedOverhead: number;
   totalRepairBudget: number;
+  notes?: string;
 }
 
 export interface MonthlyPlan {
