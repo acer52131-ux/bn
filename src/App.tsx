@@ -224,41 +224,55 @@ export default function App() {
              <div className="group/rev relative">
                 <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-2 border-b border-dashed border-slate-600 w-fit">Выручка ({isYearlyView ? 'Год' : 'Средн. Мес'})</p>
                 
-                <div className="flex gap-2 flex-wrap text-sm font-mono mt-1 text-slate-300">
+                <div className="flex gap-1.5 flex-wrap text-xs font-mono mb-1 text-slate-400">
                    <div className="group/n relative border-b border-dashed border-slate-500 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.revenueExtGross : yearlyTotals.revenueExtGross / 12)}
-                     <div className="absolute left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Внешняя выручка (от сторонних клиентов)</div>
+                     <div className="absolute left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-600">
+                       <p className="font-bold border-b border-slate-600 pb-1 mb-1">Сумма внешней выручки</p>
+                       <p>∑ (Часы внешние × Тариф внешний)</p>
+                       <p className="text-slate-400 mt-1 italic">От сторонних контрагентов.</p>
+                     </div>
                    </div>
-                   <div className="text-slate-600">+</div>
+                   <div className="text-slate-600 font-bold">+</div>
                    <div className="group/n relative border-b border-dashed border-slate-500 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.revenueIntGross : yearlyTotals.revenueIntGross / 12)}
-                     <div className="absolute left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Внутренняя выручка (со своих объектов)</div>
+                     <div className="absolute left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-600">
+                       <p className="font-bold border-b border-slate-600 pb-1 mb-1">Сумма внутренней выручки</p>
+                       <p>∑ (Часы внутренние × Тариф внутренний)</p>
+                       <p className="text-slate-400 mt-1 italic">От объектов собственного Холдинга.</p>
+                     </div>
                    </div>
-                   <div className="text-slate-600">=</div>
+                   <div className="text-slate-600 font-bold">=</div>
                 </div>
 
-                <p className="text-4xl font-black mt-1">{formatCurrency(isYearlyView ? yearlyTotals.revenueGross : yearlyTotals.revenueGross / 12)}</p>
-                <p className="text-[10px] text-slate-400 mt-2">С учетом сезонных спадов</p>
+                <p className="text-4xl font-black">{formatCurrency(isYearlyView ? yearlyTotals.revenueGross : yearlyTotals.revenueGross / 12)}</p>
              </div>
 
              <div className="group/tax relative">
                 <p className="text-rose-400 font-bold text-xs uppercase tracking-widest mb-2 border-b border-dashed border-rose-800 w-fit">Налоги (НДС+Прибыль)</p>
                 
-                <div className="flex gap-2 flex-wrap text-sm font-mono mt-1 text-rose-300/80">
+                <div className="flex gap-1.5 flex-wrap text-xs font-mono mb-1 text-rose-300/80">
                    <div className="group/n relative border-b border-dashed border-rose-500/50 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.vatPayable : yearlyTotals.vatPayable / 12)}
-                     <div className="absolute left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">НДС к уплате (Исходящий минус Входящий)</div>
+                     <div className="absolute left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-600">
+                       <p className="font-bold border-b border-slate-600 pb-1 mb-1">Остаточный НДС к уплате</p>
+                       <p>Исходящий НДС ({formatCurrency(isYearlyView ? yearlyTotals.outputVat : yearlyTotals.outputVat / 12)})</p>
+                       <p>- Входящий НДС ({formatCurrency(isYearlyView ? yearlyTotals.totalInputVat : yearlyTotals.totalInputVat / 12)})</p>
+                       <p className="text-slate-400 mt-1 italic">Входящий НДС собирается с расходов (ГСМ, Ремонт, Аренда)</p>
+                     </div>
                    </div>
-                   <div className="text-rose-600/50">+</div>
+                   <div className="text-rose-600/50 font-bold">+</div>
                    <div className="group/n relative border-b border-dashed border-rose-500/50 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.profitTax : yearlyTotals.profitTax / 12)}
-                     <div className="absolute left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Налог на прибыль / УСН (с доходов минус расходы)</div>
+                     <div className="absolute left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-600">
+                       <p className="font-bold border-b border-slate-600 pb-1 mb-1">Налог {settings.taxSystem === 'OSNO' ? 'на Прибыль (20%)' : 'по УСН (15%)'}</p>
+                       <p>Начисляется на разницу между доходами б/НДС и расходами б/НДС.</p>
+                     </div>
                    </div>
-                   <div className="text-rose-600/50">=</div>
+                   <div className="text-rose-600/50 font-bold">=</div>
                 </div>
 
-                <p className="text-3xl font-bold text-rose-400 mt-1">{formatCurrency(isYearlyView ? (yearlyTotals.vatPayable + yearlyTotals.profitTax) : (yearlyTotals.vatPayable + yearlyTotals.profitTax) / 12)}</p>
-                <p className="text-[10px] text-slate-400 mt-2">При системе: {settings.taxSystem}</p>
+                <p className="text-3xl font-bold text-rose-400">{formatCurrency(isYearlyView ? (yearlyTotals.vatPayable + yearlyTotals.profitTax) : (yearlyTotals.vatPayable + yearlyTotals.profitTax) / 12)}</p>
              </div>
              
              <div className="border-t sm:border-t-0 sm:border-l border-white/10 pt-6 sm:pt-0 sm:pl-8 group/profit relative">
@@ -266,26 +280,32 @@ export default function App() {
                   <Factory className="w-4 h-4"/> Прибыль Компании
                 </p>
 
-                <div className="flex gap-2 flex-wrap text-sm font-mono mt-1 text-indigo-300/80">
+                <div className="flex gap-1.5 flex-wrap text-[11px] font-mono mb-1 text-indigo-300/80 items-center">
                    <div className="group/n relative border-b border-dashed border-indigo-500/50 cursor-help">
-                     {formatCurrency(isYearlyView ? yearlyTotals.revenueGross : yearlyTotals.revenueGross / 12)}
-                     <div className="absolute left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Выручка б/НДС</div>
+                     {formatCurrency(isYearlyView ? (yearlyTotals.revenueGross - yearlyTotals.outputVat) : (yearlyTotals.revenueGross - yearlyTotals.outputVat) / 12)}
+                     <div className="absolute left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-600">
+                       <p className="font-bold border-b border-slate-600 pb-1 mb-1">Выручка б/НДС</p>
+                     </div>
                    </div>
-                   <div className="text-indigo-600/50">-</div>
+                   <div className="text-indigo-600/50 font-bold">-</div>
                    <div className="group/n relative border-b border-dashed border-indigo-500/50 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.expensesNetForTax : yearlyTotals.expensesNetForTax / 12)}
-                     <div className="absolute left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Все расходы (ФОТ, ГСМ, Ремонт, Аренда)</div>
+                     <div className="absolute left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-600">
+                       <p className="font-bold border-b border-slate-600 pb-1 mb-1">Сумма всех расходов б/НДС</p>
+                       <p>Включает ФОТ, ГСМ, Ремонты, Аренду техника и накладные расходы.</p>
+                     </div>
                    </div>
-                   <div className="text-indigo-600/50">-</div>
+                   <div className="text-indigo-600/50 font-bold">-</div>
                    <div className="group/n relative border-b border-dashed border-indigo-500/50 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.profitTax : yearlyTotals.profitTax / 12)}
-                     <div className="absolute left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Налоги</div>
+                     <div className="absolute left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-600">
+                       <p className="font-bold border-b border-slate-600 pb-1 mb-1">Налог с Прибыли / УСН</p>
+                     </div>
                    </div>
-                   <div className="text-indigo-600/50">=</div>
+                   <div className="text-indigo-600/50 font-bold">=</div>
                 </div>
 
-                <p className="text-4xl font-black text-indigo-100 mt-1">{formatCurrency(isYearlyView ? yearlyTotals.netProfit : yearlyTotals.netProfit / 12)}</p>
-                <div className="mt-2" />
+                <p className="text-4xl font-black text-indigo-100">{formatCurrency(isYearlyView ? yearlyTotals.netProfit : yearlyTotals.netProfit / 12)}</p>
              </div>
 
              <div className="border-t sm:border-t-0 sm:border-l border-white/10 pt-6 sm:pt-0 sm:pl-8 bg-emerald-900/40 -m-4 p-4 rounded-xl border border-emerald-800/50 group/holding relative">
@@ -293,30 +313,37 @@ export default function App() {
                   <CheckCircle2 className="w-4 h-4"/> Профит Холдинга
                 </p>
                 
-                <div className="flex gap-2 flex-wrap text-[11px] font-mono mt-1 text-emerald-300/80">
+                <div className="flex gap-1.5 flex-wrap text-[11px] font-mono mb-1 text-emerald-300/80 items-center">
                    <div className="group/n relative border-b border-dashed border-emerald-500/50 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.netProfit : yearlyTotals.netProfit / 12)}
-                     <div className="absolute right-0 sm:left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Прибыль УК (очищенная)</div>
+                     <div className="absolute right-0 sm:left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-emerald-600">
+                       <p className="font-bold border-b border-emerald-600 pb-1 mb-1">Очищенная Чистая Прибыль УК</p>
+                     </div>
                    </div>
-                   <div className="text-emerald-600/50">+</div>
+                   <div className="text-emerald-600/50 font-bold">+</div>
                    <div className="group/n relative border-b border-dashed border-emerald-500/50 cursor-help">
                      {formatCurrency(isYearlyView ? yearlyTotals.rentNet : yearlyTotals.rentNet / 12)}
-                     <div className="absolute right-0 sm:left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Денежный поток от уплаченной аренды Транспортной компанией</div>
+                     <div className="absolute right-0 sm:left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-emerald-600">
+                       <p className="font-bold border-b border-emerald-600 pb-1 mb-1">Аренда, уплаченная Холдингу</p>
+                       <p>Эти деньги физически остались внутри Группы Компаний (без НДС).</p>
+                     </div>
                    </div>
                    {yearlyTotals.holdingVatBenefit > 0 && (
                       <>
-                        <div className="text-emerald-600/50">+</div>
-                        <div className="group/n relative border-b border-dashed border-emerald-500/50 cursor-help">
+                        <div className="text-emerald-600/50 font-bold">+</div>
+                        <div className="group/n relative border-b border-dashed border-emerald-500/50 cursor-help text-emerald-200">
                           {formatCurrency(isYearlyView ? yearlyTotals.holdingVatBenefit : yearlyTotals.holdingVatBenefit / 12)}
-                          <div className="absolute right-0 sm:left-0 bottom-full mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] rounded p-2 shadow opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none">Экономия на НДС у Холдинга при внутренних перевозках</div>
+                          <div className="absolute right-0 sm:left-0 top-full mt-2 w-max max-w-xs bg-slate-800 text-white text-[11px] font-sans rounded-xl p-3 shadow-xl opacity-0 group-hover/n:opacity-100 transition-opacity z-50 pointer-events-none border border-emerald-600">
+                            <p className="font-bold border-b border-emerald-600 pb-1 mb-1">Экономия на НДС у Холдинга</p>
+                            <p>Внутренние объемы создали Входящий НДС для других компаний Холдинга, генерируя экономию.</p>
+                          </div>
                         </div>
                       </>
                    )}
-                   <div className="text-emerald-600/50">=</div>
+                   <div className="text-emerald-600/50 font-bold">=</div>
                 </div>
 
-                <p className="text-4xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)] mt-1">{formatCurrency(isYearlyView ? yearlyTotals.holdingBenefit : yearlyTotals.holdingBenefit / 12)}</p>
-                <div className="mt-2" />
+                <p className="text-4xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">{formatCurrency(isYearlyView ? yearlyTotals.holdingBenefit : yearlyTotals.holdingBenefit / 12)}</p>
              </div>
           </div>
           </div>
